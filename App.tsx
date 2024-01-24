@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {NativeModules, Button, PermissionsAndroid} from 'react-native';
 import { StyleSheet,View,Text } from 'react-native';
 import Geolocation from 'react-native-geolocation-service'
-import { DeviceEventEmitter } from 'react-native';
+import { NativeEventEmitter } from 'react-native';
 
 const { GeolocalisationNearby } = NativeModules
+const eventEmitter = new NativeEventEmitter(GeolocalisationNearby);
 
 const App = () => {
   PermissionsAndroid.requestMultiple([
@@ -20,43 +21,44 @@ const App = () => {
         console.log("Vous ne pouvez pas utiliser la géolocalisation.")
     })
   
-  const [location, setLocation] = useState(false);
-
+  
   const onPressAdvertising =  () => {
-    let countNearbyDevices=0;
     GeolocalisationNearby.startAdvertising("did:peaq:123");
-
-    // Récupération des coordonnées d'au plus 3 :
-    DeviceEventEmitter.addListener("deviceFound", (msg) => { 
-        if (countNearbyDevices <= 3) {
-          console.log(msg)
-          countNearbyDevices++}
-        })
-    };
-
-  const onPressStopAd = () => {
-    GeolocalisationNearby.stopAdvertising();
   }
+
+  // stockage de la localisation pour la publicité
+  const [location, setLocation] = useState(false);
+  // event listener
+  useEffect(() => {
+      const subscription = eventEmitter.addListener("deviceFound", (msg) => {
+      let jsonData = JSON.parse(msg)
+      setLocation(jsonData);
+      console.log(location)})
+
+      return () => subscription.remove();
+      }
+    ,[])
+
+  
+  const onPressStopAd = () => {
+      GeolocalisationNearby.stopAdvertising();
+    }
 
   const onPressDiscovering = () => {
     // On détecte la géolocalisation puis on envoie au serveur pour le mettre dans un smart contract
     Geolocation.getCurrentPosition(
-      position => {
-        console.log(position);
-        setLocation(position);
-        // envoie au serveur pour le mettre dans le smart contract
-        sendRequest(position);
-        // enregistrement dans nearby
-        GeolocalisationNearby.setLoc(position.coords.longitude, position.coords.latitude);
-      },
-      error => {
-        console.log(error.code, error.message);
-        setLocation(false);
-      },
-    
-      {enableHighAccuracy: true, timeout: 30000, maximumAge: 10000},
-    )
-
+        position => {
+          console.log(position);
+          // envoie au serveur pour le mettre dans le smart contract
+          sendRequest(position);
+          // enregistrement dans nearby
+          GeolocalisationNearby.setLoc(position.coords.longitude, position.coords.latitude);
+        },
+        error => {
+          console.log(error.code, error.message);
+        },
+      
+        {enableHighAccuracy: true, timeout: 30000, maximumAge: 10000})
     // Découverte
     GeolocalisationNearby.startDiscovery("did:peaq:456");
   };

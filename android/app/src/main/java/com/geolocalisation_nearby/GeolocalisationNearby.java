@@ -1,11 +1,15 @@
 package com.geolocalisation_nearby;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.RCTNativeAppEventEmitter;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
@@ -127,7 +131,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
                             JSONObject coords = new JSONObject();
                             try {
                                 coords.put("longitude", _longitude);
-                                coords.put("latitude", _longitude);
+                                coords.put("latitude", _latitude);
                             } catch (JSONException e) {
                                 throw new RuntimeException(e);
                             }
@@ -180,15 +184,22 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
                     // A previously discovered endpoint has gone away.
                 }
             };
-    static class ReceiveBytesPayloadListener extends PayloadCallback {
-
-        String completePayload;
+    class ReceiveBytesPayloadListener extends PayloadCallback {
         @Override
         public void onPayloadReceived(@NonNull String endpointId, Payload payload) {
             // This always gets the full data of the payload. Is null if it's not a BYTES payload.
             if (payload.getType() == Payload.Type.BYTES) {
                 byte[] receivedBytes = payload.asBytes();
-                completePayload +=  new String(receivedBytes);
+                String message = new String(receivedBytes);
+
+                try{
+                    getReactApplicationContext()
+                            .getJSModule(RCTNativeAppEventEmitter.class)
+                            .emit("deviceFound", message);
+                    Log.d("payloadSent", "ok");
+                }catch (Exception e){
+                    Log.d("payloadNotSent", String.valueOf(e));
+                }
             }
         }
 
@@ -202,6 +213,18 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
                 Log.d("payloadUpdate", "fail");
             }
         }
+
+    }
+
+    // Required for rn built in EventEmitter Calls.
+    @ReactMethod
+    public void addListener(String eventName) {
+
+    }
+
+    @ReactMethod
+    public void removeListeners(Integer count) {
+
     }
 
 
