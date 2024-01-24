@@ -33,6 +33,7 @@ const App = () => {
       const subscription = eventEmitter.addListener("deviceFound", (msg) => {
       let jsonData = JSON.parse(msg)
       setLocation(jsonData);
+      console.log("eventEmitter");
       console.log(location)})
 
       return () => subscription.remove();

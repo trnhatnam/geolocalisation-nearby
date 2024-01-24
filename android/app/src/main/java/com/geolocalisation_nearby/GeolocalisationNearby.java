@@ -87,7 +87,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
     @ReactMethod
     public void startDiscovery(String did) {
         this._did = did;
-        Log.d("startDiscovery", "Begin");
+        Log.d("startDiscovery", "Start");
         DiscoveryOptions discoveryOptions =
                 new DiscoveryOptions.Builder().setStrategy(STRATEGY).build();
         Nearby.getConnectionsClient(getReactApplicationContext())
@@ -105,7 +105,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void stopDiscovery() {
-        Log.d("stopDiscovery", "Begin");
+        Log.d("stopDiscovery", "Start");
         Nearby.getConnectionsClient(getReactApplicationContext())
                 .stopDiscovery();
         Nearby.getConnectionsClient(getReactApplicationContext())
@@ -196,7 +196,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
                     getReactApplicationContext()
                             .getJSModule(RCTNativeAppEventEmitter.class)
                             .emit("deviceFound", message);
-                    Log.d("payloadSent", "ok");
+                    Log.d("payloadReceived", "ok");
                 }catch (Exception e){
                     Log.d("payloadNotSent", String.valueOf(e));
                 }
