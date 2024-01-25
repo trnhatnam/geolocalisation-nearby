@@ -3,6 +3,8 @@ import {NativeModules, Button, PermissionsAndroid} from 'react-native';
 import { StyleSheet,View,Text } from 'react-native';
 import Geolocation from 'react-native-geolocation-service'
 import { NativeEventEmitter } from 'react-native';
+import geolib from 'geolib'
+import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 
 const { GeolocalisationNearby } = NativeModules
 const eventEmitter = new NativeEventEmitter(GeolocalisationNearby);
@@ -26,23 +28,31 @@ const App = () => {
     GeolocalisationNearby.startAdvertising("did:peaq:123");
   }
 
-  // stockage de la localisation pour la publicité
-  const [location, setLocation] = useState(false);
-  // event listener
+  // ---- stockage des localisations des appareils à proximité pour la publicité -----
+  // appareils à proximité
+  const [locationArray, updateLocationArray] = useState<Array<{"longitude":Float,"latitude":Float}>>([]);
+  // localisation à partir des appareils à proximité
+  const [location, setLocation] = useState<{"longitude":Float,"latitude":Float}|null>(null);
+
   useEffect(() => {
       const subscription = eventEmitter.addListener("deviceFound", (msg) => {
-      let jsonData = JSON.parse(msg)
-      setLocation(jsonData);
+      const jsonData = JSON.parse(msg);
       console.log("eventEmitter");
-      console.log(location)})
+      console.log(jsonData);
+      updateLocationArray(prevLocationArray => [...prevLocationArray, jsonData]);
+      if (locationArray)
+        setLocation(geolib.getCenterOfBounds(locationArray));
+      }
+     );
 
-      return () => subscription.remove();
+    return () => subscription.remove();
       }
     ,[])
-
+  // ------
   
   const onPressStopAd = () => {
       GeolocalisationNearby.stopAdvertising();
+      updateLocationArray(prevLocationArray => []);
     }
 
   const onPressDiscovering = () => {
@@ -71,7 +81,7 @@ const App = () => {
   return (
   <>
   <View style={styles.space} />
-  <Text style={styles.text}>Activer le wifi (pas besoin d'être connecté à Internet), la localisation, le bluetooth et le partage à proximité pour que Nearby fonctionne. Si vous êtes un utilisateur, utilisez l'advertising pour signaler votre présence</Text>
+  <Text style={styles.text}>Activer le wifi (pas besoin d'être connecté à Internet), la localisation, le bluetooth pour que Nearby fonctionne. Si vous êtes un utilisateur, utilisez l'advertising pour signaler votre présence</Text>
   <View style={styles.button}>
     <Button
     title="Advertising"
@@ -83,6 +93,8 @@ const App = () => {
     color="#841584"
     onPress={onPressStopAd}/>
   </View>
+    <Text style={styles.text}>Longitude : {location ? location.longitude : null}</Text>
+    <Text style={styles.text}>Latitude : {location ? location.latitude : null}</Text>
   <View style={styles.space} />
   <Text style={styles.text}>Si votre appareil joue le rôle d\'une antenne, utilisez plutôt la découverte et lasser la localisation activé</Text>
   <View style={styles.button}>
@@ -128,14 +140,13 @@ const sendRequest = async (position: any) => {
     "latitude": position.coords.latitude
   });
 
-  const requestOptions = {
+  fetch("http://192.168.1.31:8000/geolocation" , 
+  {
     method: 'POST',
     headers: myHeaders,
     body: raw,
     redirect: 'follow'
-  };
-
-  fetch("http://192.168.1.31:8000/geolocation" , requestOptions)
+  })
     .then(response => response.text())
     .then(result => console.log(result))
     .catch(error => console.log('error', error))
