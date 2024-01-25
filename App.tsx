@@ -4,7 +4,7 @@ import { StyleSheet,View,Text } from 'react-native';
 import Geolocation from 'react-native-geolocation-service'
 import { NativeEventEmitter } from 'react-native';
 
-const geolib = require('geolib') // je suis obligé d'importer comme ça sinon ça revient un objet undefined
+const geolib = require('geolib') // je suis obligé d'importer comme ça sinon ça renvoit un objet undefined
 const { GeolocalisationNearby } = NativeModules
 const eventEmitter = new NativeEventEmitter(GeolocalisationNearby);
 
@@ -141,7 +141,7 @@ const sendRequest = async (position: any) => {
     "latitude": position.coords.latitude
   });
 
-  fetch("http://192.168.1.31:8000/geolocation" , 
+  fetch("http://localhost:8000/geolocation" , 
   {
     method: 'POST',
     headers: myHeaders,
