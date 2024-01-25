@@ -3,9 +3,8 @@ import {NativeModules, Button, PermissionsAndroid} from 'react-native';
 import { StyleSheet,View,Text } from 'react-native';
 import Geolocation from 'react-native-geolocation-service'
 import { NativeEventEmitter } from 'react-native';
-import geolib from 'geolib'
-import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 
+const geolib = require('geolib') // je suis obligé d'importer comme ça sinon ça revient un objet undefined
 const { GeolocalisationNearby } = NativeModules
 const eventEmitter = new NativeEventEmitter(GeolocalisationNearby);
 
@@ -14,7 +13,8 @@ const App = () => {
     PermissionsAndroid.PERMISSIONS.BLUETOOTH_ADVERTISE,
     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
     PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-    PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT]
+    PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+    PermissionsAndroid.PERMISSIONS.NEARBY_WIFI_DEVICES]
   ).then((result)=>
     {
       if (result)
@@ -22,7 +22,7 @@ const App = () => {
       else
         console.log("Vous ne pouvez pas utiliser la géolocalisation.")
     })
-  
+
   
   const onPressAdvertising =  () => {
     GeolocalisationNearby.startAdvertising("did:peaq:123");
@@ -30,21 +30,22 @@ const App = () => {
 
   // ---- stockage des localisations des appareils à proximité pour la publicité -----
   // appareils à proximité
-  const [locationArray, updateLocationArray] = useState<Array<{"longitude":Float,"latitude":Float}>>([]);
+  const [locationArray, updateLocationArray] = useState<Array<{"longitude":number,"latitude":number}>>([]);
   // localisation à partir des appareils à proximité
-  const [location, setLocation] = useState<{"longitude":Float,"latitude":Float}|null>(null);
+  const [location, setLocation] = useState<{"longitude":number,"latitude":number}|null>(null);
 
   useEffect(() => {
       const subscription = eventEmitter.addListener("deviceFound", (msg) => {
       const jsonData = JSON.parse(msg);
       console.log("eventEmitter");
       console.log(jsonData);
-      updateLocationArray(prevLocationArray => [...prevLocationArray, jsonData]);
-      if (locationArray)
-        setLocation(geolib.getCenterOfBounds(locationArray));
-      }
-     );
-
+      updateLocationArray(prevLocationArray => {
+         const newLocationArray = [...prevLocationArray, jsonData];
+         setLocation(geolib.getCenterOfBounds(newLocationArray));
+         return newLocationArray;
+      });
+      ;}
+    )
     return () => subscription.remove();
       }
     ,[])
@@ -93,8 +94,8 @@ const App = () => {
     color="#841584"
     onPress={onPressStopAd}/>
   </View>
-    <Text style={styles.text}>Longitude : {location ? location.longitude : null}</Text>
-    <Text style={styles.text}>Latitude : {location ? location.latitude : null}</Text>
+    <Text style={styles.text}>Longitude : {location ? location.longitude : "..."}</Text>
+    <Text style={styles.text}>Latitude : {location ? location.latitude : "..."}</Text>
   <View style={styles.space} />
   <Text style={styles.text}>Si votre appareil joue le rôle d\'une antenne, utilisez plutôt la découverte et lasser la localisation activé</Text>
   <View style={styles.button}>

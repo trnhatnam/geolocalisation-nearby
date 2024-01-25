@@ -54,6 +54,8 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
         _latitude = lat;
     };
 
+    private boolean isDiscovering = false;
+
     @ReactMethod
     public void startAdvertising(String did) {
         this._did = did;
@@ -87,6 +89,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
     @ReactMethod
     public void startDiscovery(String did) {
         this._did = did;
+        this.isDiscovering = true;
         Log.d("startDiscovery", "Start");
         DiscoveryOptions discoveryOptions =
                 new DiscoveryOptions.Builder().setStrategy(STRATEGY).build();
@@ -105,6 +108,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void stopDiscovery() {
+        this.isDiscovering = false;
         Log.d("stopDiscovery", "Start");
         Nearby.getConnectionsClient(getReactApplicationContext())
                 .stopDiscovery();
@@ -128,16 +132,18 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
                         case ConnectionsStatusCodes.STATUS_OK -> {
                             // Retrieve coordinates
                             Log.d("connection", "ok");
-                            JSONObject coords = new JSONObject();
-                            try {
-                                coords.put("longitude", _longitude);
-                                coords.put("latitude", _latitude);
-                            } catch (JSONException e) {
-                                throw new RuntimeException(e);
+                            if (isDiscovering) {
+                                JSONObject coords = new JSONObject();
+                                try {
+                                    coords.put("longitude", _longitude);
+                                    coords.put("latitude", _latitude);
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                Payload bytesPayload = Payload.fromBytes(coords.toString().getBytes());
+                                Nearby.getConnectionsClient(getReactApplicationContext()).sendPayload(endpointId, bytesPayload);
+                                Log.d("payloadSent", "ok");
                             }
-                            Payload bytesPayload = Payload.fromBytes(coords.toString().getBytes());
-                            Nearby.getConnectionsClient(getReactApplicationContext()).sendPayload(endpointId, bytesPayload);
-                            Log.d("payloadSent", "ok");
                         }
                         case ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED ->
                             // The connection was rejected by one or both sides.
