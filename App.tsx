@@ -88,7 +88,7 @@ const App = () => {
   return (
   <>
   <View style={styles.space} />
-  <Text style={styles.text}>Activer le wifi (pas besoin d'être connecté à Internet), la localisation, le bluetooth pour que Nearby fonctionne. Si vous êtes un utilisateur, utilisez l'advertising pour signaler votre présence</Text>
+  <Text style={styles.text}>Activer le wifi (pas besoin d'être connecté à Internet), la localisation (exacte), le bluetooth pour que Nearby fonctionne. Si vous êtes un utilisateur, utilisez l'advertising pour signaler votre présence</Text>
   <View style={styles.button}>
     <Button
     title="Advertising"
@@ -103,7 +103,7 @@ const App = () => {
     <Text style={styles.text}>Longitude : {location ? location.longitude : "..."}</Text>
     <Text style={styles.text}>Latitude : {location ? location.latitude : "..."}</Text>
   <View style={styles.space} />
-  <Text style={styles.text}>Si votre appareil joue le rôle d\'une antenne, utilisez plutôt la découverte et lasser la localisation activé</Text>
+  <Text style={styles.text}>Si votre appareil joue le rôle d\'une antenne, utilisez plutôt la découverte et lasser la localisation (exacte) activé</Text>
   <View style={styles.button}>
     <Button
     title="Discovering"
