@@ -23,8 +23,11 @@ const App = () => {
         console.log("Vous ne pouvez pas utiliser la géolocalisation.")
     })
 
-  
+  // état de l'appareil
+  const [state, setState] = useState("Déconnecté");
+
   const onPressAdvertising =  () => {
+    setState("Advertising");
     GeolocalisationNearby.startAdvertising("did:peaq:123");
   }
 
@@ -33,7 +36,7 @@ const App = () => {
   const [locationArray, updateLocationArray] = useState<Array<{"longitude":number,"latitude":number}>>([]);
   // localisation à partir des appareils à proximité
   const [location, setLocation] = useState<{"longitude":number,"latitude":number}|null>(null);
-
+  
   useEffect(() => {
       const subscription = eventEmitter.addListener("deviceFound", (msg) => {
       const jsonData = JSON.parse(msg);
@@ -52,11 +55,13 @@ const App = () => {
   // ------
   
   const onPressStopAd = () => {
+      setState("Déconnecté");
       GeolocalisationNearby.stopAdvertising();
       updateLocationArray(prevLocationArray => []);
     }
 
   const onPressDiscovering = () => {
+    setState("Discovering");
     // On détecte la géolocalisation puis on envoie au serveur pour le mettre dans un smart contract
     Geolocation.getCurrentPosition(
         position => {
@@ -76,6 +81,7 @@ const App = () => {
   };
 
   const onPressStopDiscovering = () => {
+    setState("Déconnecté");
     GeolocalisationNearby.stopDiscovery();
   };
 
@@ -109,6 +115,7 @@ const App = () => {
     color="#841584"
     onPress={onPressStopDiscovering}/>
   </View>
+  <Text style={styles.text}>Etat : {state}</Text>
     </>
   );
 };
