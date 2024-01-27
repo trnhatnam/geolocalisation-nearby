@@ -4,7 +4,7 @@ import { StyleSheet,View,Text } from 'react-native';
 import Geolocation from 'react-native-geolocation-service'
 import { NativeEventEmitter } from 'react-native';
 
-const geolib = require('geolib') // je suis obligé d'importer comme ça sinon ça renvoit un objet undefined
+const geolib = require('geolib') // je suis obligé d'importer comme ça sinon ça renvoie un objet undefined
 const { GeolocalisationNearby } = NativeModules
 const eventEmitter = new NativeEventEmitter(GeolocalisationNearby);
 
