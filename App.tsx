@@ -152,7 +152,7 @@ const sendRequest = async (did: String, position: any) => {
     "latitude": position.coords.latitude
   });
 
-  fetch("http://localhost:8000/geolocation" , 
+  fetch("http://localhost:3000/geolocation" , 
   {
     method: 'POST',
     headers: myHeaders,
