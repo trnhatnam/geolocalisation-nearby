@@ -24,11 +24,13 @@ const App = () => {
     })
 
   // état de l'appareil
+  const [did, setDid] = useState("");
   const [state, setState] = useState("Déconnecté");
 
   const onPressAdvertising =  () => {
+    setDid("did:peaq:123");
     setState("Advertising");
-    GeolocalisationNearby.startAdvertising("did:peaq:123");
+    GeolocalisationNearby.startAdvertising(did);
   }
 
   // ---- stockage des localisations des appareils à proximité pour la publicité -----
@@ -61,13 +63,14 @@ const App = () => {
     }
 
   const onPressDiscovering = () => {
+    setDid("did:peaq:123");
     setState("Discovering");
     // On détecte la géolocalisation puis on envoie au serveur pour le mettre dans un smart contract
     Geolocation.getCurrentPosition(
         position => {
           console.log(position);
           // envoie au serveur pour le mettre dans le smart contract
-          sendRequest(position);
+          sendRequest(did,position);
           // enregistrement dans nearby
           GeolocalisationNearby.setLoc(position.coords.longitude, position.coords.latitude);
         },
@@ -77,7 +80,7 @@ const App = () => {
       
         {enableHighAccuracy: true, timeout: 30000, maximumAge: 10000})
     // Découverte
-    GeolocalisationNearby.startDiscovery("did:peaq:456");
+    GeolocalisationNearby.startDiscovery(did);
   };
 
   const onPressStopDiscovering = () => {
@@ -138,12 +141,13 @@ const styles = StyleSheet.create({
   }
 })
 
-const sendRequest = async (position: any) => { 
+const sendRequest = async (did: String, position: any) => { 
   // Envoie vers le serveur pour l'écriture du smart contract
   const myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
 
   const raw = JSON.stringify({
+    "did":did,
     "longitude": position.coords.longitude,
     "latitude": position.coords.latitude
   });
