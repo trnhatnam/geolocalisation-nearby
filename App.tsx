@@ -24,11 +24,10 @@ const App = () => {
     })
 
   // état de l'appareil
-  const [did, setDid] = useState("");
+  const did = "did:peaq:123";
   const [state, setState] = useState("Déconnecté");
 
   const onPressAdvertising =  () => {
-    setDid("did:peaq:123");
     setState("Advertising");
     GeolocalisationNearby.startAdvertising(did);
   }
@@ -63,12 +62,10 @@ const App = () => {
     }
 
   const onPressDiscovering = () => {
-    setDid("did:peaq:123");
     setState("Discovering");
     // On détecte la géolocalisation puis on envoie au serveur pour le mettre dans un smart contract
     Geolocation.getCurrentPosition(
         position => {
-          console.log(position);
           // envoie au serveur pour le mettre dans le smart contract
           sendRequest(did,position);
           // enregistrement dans nearby
@@ -152,7 +149,7 @@ const sendRequest = async (did: String, position: any) => {
     "latitude": position.coords.latitude
   });
 
-  fetch("http://localhost:8000/geolocation" , 
+  fetch("http://192.168.1.31:8000/geolocation" , 
   {
     method: 'POST',
     headers: myHeaders,
