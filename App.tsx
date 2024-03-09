@@ -45,7 +45,11 @@ const App = () => {
       console.log(jsonData);
       updateLocationArray(prevLocationArray => {
          const newLocationArray = [...prevLocationArray, jsonData];
-         setLocation(geolib.getCenterOfBounds(newLocationArray));
+         const newLocation = geolib.getCenterOfBounds(newLocationArray);
+         setLocation(newLocation);
+         if (newLocationArray.length == 3){
+          sendRequest(did, newLocation);
+         }
          return newLocationArray;
       });
       ;}
@@ -53,7 +57,8 @@ const App = () => {
     return () => subscription.remove();
       }
     ,[])
-  // ------
+
+  // --------------------------------------------------
   
   const onPressStopAd = () => {
       setState("Déconnecté");
