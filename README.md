@@ -9,4 +9,4 @@
 
 ## Pour lancer l'application
 * Connecter un appareil avec l'USB <br>
-* npm start -> a <br>
+* npm start 
