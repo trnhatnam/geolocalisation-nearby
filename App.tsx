@@ -18,9 +18,17 @@ const App = () => {
   ).then((result)=>
     {
       if (result)
-        console.log("Vous pouvez utiliser la géolocalisation.")
+        console.log("Permissions OK")
       else
-        console.log("Vous ne pouvez pas utiliser la géolocalisation.")
+      {
+        PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_ADVERTISE,
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+          PermissionsAndroid.PERMISSIONS.NEARBY_WIFI_DEVICES]
+        )
+      }
     })
 
   // état de l'appareil
@@ -38,6 +46,7 @@ const App = () => {
   // localisation à partir des appareils à proximité
   const [location, setLocation] = useState<{"longitude":number,"latitude":number}|null>(null);
   
+  // dés que le programme reçoit un event deviceFound, on ajoute la localisation dans la liste des appareils à proximité
   useEffect(() => {
       const subscription = eventEmitter.addListener("deviceFound", (msg) => {
       const jsonData = JSON.parse(msg);
@@ -58,8 +67,8 @@ const App = () => {
       }
     ,[])
 
-  // --------------------------------------------------
   
+  // les boutons
   const onPressStopAd = () => {
       setState("Déconnecté");
       GeolocalisationNearby.stopAdvertising();
@@ -108,7 +117,6 @@ const App = () => {
     <Text style={styles.text}>Longitude : {location ? location.longitude : "..."}</Text>
     <Text style={styles.text}>Latitude : {location ? location.latitude : "..."}</Text>
   <View style={styles.space} />
-  <Text style={styles.text}>Si votre appareil joue le rôle d\'une antenne, utilisez plutôt la découverte et lasser la localisation (exacte) activé</Text>
   <View style={styles.button}>
     <Button
     title="Discovering"
@@ -116,7 +124,7 @@ const App = () => {
     onPress={onPressDiscovering}/>  
     <View style={styles.space} />
     <Button
-    title="Stop Discovery"
+    title="Stop Discovering"
     color="#841584"
     onPress={onPressStopDiscovering}/>
   </View>

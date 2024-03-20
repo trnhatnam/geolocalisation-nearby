@@ -12,9 +12,11 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.RCTNativeAppEventEmitter;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
+import com.google.android.gms.nearby.connection.BandwidthInfo;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
 import com.google.android.gms.nearby.connection.ConnectionResolution;
+import com.google.android.gms.nearby.connection.Connections;
 import com.google.android.gms.nearby.connection.ConnectionsStatusCodes;
 import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo;
 import com.google.android.gms.nearby.connection.DiscoveryOptions;
@@ -32,7 +34,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
     private String _did;
     private double _longitude;
     private double _latitude;
-
+    private double _distance;
     GeolocalisationNearby(ReactApplicationContext context) {
         super(context);
     }
@@ -119,6 +121,15 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
     private final ConnectionLifecycleCallback connectionLifecycleCallback =
             new ConnectionLifecycleCallback() {
                 @Override
+                public void onBandwidthChanged(@NonNull String endpointId, @NonNull BandwidthInfo bandwidthInfo)
+                {
+                    //Log.d("Bandwidth quality :", String.valueOf(bandwidthInfo.getQuality()));
+                    //int quality = bandwidthInfo.getQuality();
+                    //if (quality == 1) {
+                    //    _distance = 3;
+                    //}
+                }
+                @Override
                 public void onConnectionInitiated(@NonNull String endpointId, @NonNull ConnectionInfo connectionInfo) {
                     // Automatically accept the connection on both sides.
                     Log.d("ConnectionInitiated", "ok");
@@ -183,6 +194,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
                                         // Nearby Connections failed to request the connection.
                                         Log.d("endpointCallback", String.valueOf(e));
                                     });
+
                 }
 
                 @Override
@@ -232,9 +244,6 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
     public void removeListeners(Integer count) {
 
     }
-
-
-
 }
 
 
