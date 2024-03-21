@@ -64,8 +64,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
         Log.d("startAdvertising", "Start");
 
         AdvertisingOptions advertisingOptions =
-                new AdvertisingOptions.Builder().setStrategy(STRATEGY).build();
-
+                new AdvertisingOptions.Builder().setStrategy(STRATEGY).setLowPower(true).build();
         Nearby.getConnectionsClient(getReactApplicationContext())
                 .startAdvertising(
                         _did, SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
@@ -94,7 +93,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
         this.isDiscovering = true;
         Log.d("startDiscovery", "Start");
         DiscoveryOptions discoveryOptions =
-                new DiscoveryOptions.Builder().setStrategy(STRATEGY).build();
+                new DiscoveryOptions.Builder().setStrategy(STRATEGY).setLowPower(true).build();
         Nearby.getConnectionsClient(getReactApplicationContext())
                 .startDiscovery(SERVICE_ID, endpointDiscoveryCallback, discoveryOptions)
                 .addOnSuccessListener(
@@ -120,15 +119,6 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
 
     private final ConnectionLifecycleCallback connectionLifecycleCallback =
             new ConnectionLifecycleCallback() {
-                @Override
-                public void onBandwidthChanged(@NonNull String endpointId, @NonNull BandwidthInfo bandwidthInfo)
-                {
-                    //Log.d("Bandwidth quality :", String.valueOf(bandwidthInfo.getQuality()));
-                    //int quality = bandwidthInfo.getQuality();
-                    //if (quality == 1) {
-                    //    _distance = 3;
-                    //}
-                }
                 @Override
                 public void onConnectionInitiated(@NonNull String endpointId, @NonNull ConnectionInfo connectionInfo) {
                     // Automatically accept the connection on both sides.
