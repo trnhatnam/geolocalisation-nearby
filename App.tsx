@@ -58,6 +58,7 @@ const App = () => {
          setLocation(newLocation);
          if (newLocationArray.length == 3){
           sendRequest(did, newLocation);
+
          }
          return newLocationArray;
       });
@@ -102,7 +103,7 @@ const App = () => {
   return (
   <>
   <View style={styles.space} />
-  <Text style={styles.text}>Activer le wifi (pas besoin d'être connecté à Internet), la localisation (exacte), le bluetooth pour que Nearby fonctionne. Si vous êtes un utilisateur, utilisez l'advertising pour signaler votre présence</Text>
+  <Text style={styles.text}>Activer le wifi (pas besoin d'être connecté à Internet), la localisation, le bluetooth pour que Nearby fonctionne. Si vous êtes un utilisateur, utilisez l'advertising pour signaler votre présence</Text>
   <View style={styles.button}>
     <Button
     title="Advertising"
