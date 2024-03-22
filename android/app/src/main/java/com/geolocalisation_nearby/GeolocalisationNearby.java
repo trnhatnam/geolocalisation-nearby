@@ -3,6 +3,10 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -34,7 +38,6 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
     private String _did;
     private double _longitude;
     private double _latitude;
-    private double _distance;
     GeolocalisationNearby(ReactApplicationContext context) {
         super(context);
     }
@@ -64,7 +67,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
         Log.d("startAdvertising", "Start");
 
         AdvertisingOptions advertisingOptions =
-                new AdvertisingOptions.Builder().setStrategy(STRATEGY).setLowPower(true).build();
+                new AdvertisingOptions.Builder().setStrategy(STRATEGY).build();
         Nearby.getConnectionsClient(getReactApplicationContext())
                 .startAdvertising(
                         _did, SERVICE_ID, connectionLifecycleCallback, advertisingOptions)
@@ -93,7 +96,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
         this.isDiscovering = true;
         Log.d("startDiscovery", "Start");
         DiscoveryOptions discoveryOptions =
-                new DiscoveryOptions.Builder().setStrategy(STRATEGY).setLowPower(true).build();
+                new DiscoveryOptions.Builder().setStrategy(STRATEGY).build();
         Nearby.getConnectionsClient(getReactApplicationContext())
                 .startDiscovery(SERVICE_ID, endpointDiscoveryCallback, discoveryOptions)
                 .addOnSuccessListener(
@@ -134,14 +137,25 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
                             // Retrieve coordinates
                             Log.d("connection", "ok");
                             if (isDiscovering) {
-                                JSONObject coords = new JSONObject();
+                                // Récupération du niveau du signal
+                                WifiManager wifiManager = (WifiManager) getReactApplicationContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                                int numberOfLevels = 5;
+                                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                                int level = WifiManager.calculateSignalLevel(wifiInfo.getRssi(), numberOfLevels);
+
+                                // Distance
+                                double distance = Math.pow(27.55 - (20 * Math.log10(wifiInfo.getFrequency()) + Math.abs(level)) / 20, 10);
+
+                                // Envoie un message à l'utilisateur sur la localisation de l'antenne
+                                JSONObject msg = new JSONObject();
                                 try {
-                                    coords.put("longitude", _longitude);
-                                    coords.put("latitude", _latitude);
+                                    msg.put("longitude", _longitude);
+                                    msg.put("latitude", _latitude);
+                                    msg.put("distance", distance);
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);
                                 }
-                                Payload bytesPayload = Payload.fromBytes(coords.toString().getBytes());
+                                Payload bytesPayload = Payload.fromBytes(msg.toString().getBytes());
                                 Nearby.getConnectionsClient(getReactApplicationContext()).sendPayload(endpointId, bytesPayload);
                                 Log.d("payloadSent", "ok");
                             }
@@ -199,7 +213,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
             if (payload.getType() == Payload.Type.BYTES) {
                 byte[] receivedBytes = payload.asBytes();
                 String message = new String(receivedBytes);
-
+                // Créer un event pour le frontend
                 try{
                     getReactApplicationContext()
                             .getJSModule(RCTNativeAppEventEmitter.class)
@@ -234,6 +248,7 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
     public void removeListeners(Integer count) {
 
     }
+
 }
 
 
