@@ -137,21 +137,11 @@ public class GeolocalisationNearby extends ReactContextBaseJavaModule {
                             // Retrieve coordinates
                             Log.d("connection", "ok");
                             if (isDiscovering) {
-                                // Récupération du niveau du signal
-                                WifiManager wifiManager = (WifiManager) getReactApplicationContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                                int numberOfLevels = 5;
-                                WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-                                int level = WifiManager.calculateSignalLevel(wifiInfo.getRssi(), numberOfLevels);
-
-                                // Distance
-                                double distance = Math.pow(27.55 - (20 * Math.log10(wifiInfo.getFrequency()) + Math.abs(level)) / 20, 10);
-
                                 // Envoie un message à l'utilisateur sur la localisation de l'antenne
                                 JSONObject msg = new JSONObject();
                                 try {
                                     msg.put("longitude", _longitude);
                                     msg.put("latitude", _latitude);
-                                    msg.put("distance", distance);
                                 } catch (JSONException e) {
                                     throw new RuntimeException(e);
                                 }
